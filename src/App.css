@@ -1,3 +1,7 @@
+body{
+  background-color: #cac8bc;
+  font-family: 'Rubik', sans-serif;
+}
 .container{
   max-width: 600px;
 }
@@ -5,7 +9,6 @@
   margin: 5px;
 }
 .ballsContainer {
-  background-color: #0769b5;
   padding: 10px 5px;
 }
 .ballImg{
@@ -26,12 +29,6 @@
   left: 50%;
   transform: translate(-50%, -50%)
 }
-.isActive{
-  background-color: #71b081;
-}
-.isNotActive{
-  background-color: gray;
-}
 .bgGreen {
   background-color: #71b081;
 }
@@ -45,6 +42,10 @@
 }
 .centerTxt{
   text-align: center;
+}
+.icon{
+  max-width: 15px;
+  max-height: 15px;
 }
 .switch {
   position: relative;
@@ -104,4 +105,39 @@ input:checked+.slider:before {
 
 .slider.round:before {
   border-radius: 50%;
+}
+.playerContainer{
+  background-color: #8f9ba3; 
+  border: none;
+  border-radius: 10px;
+}
+.playerName{
+  font-weight: bold;
+  font-size: 1.5rem;
+  color: #dfdccd;
+  margin: 0px;
+  padding: 0px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.toWin{
+  color: #dfdccd;
+  font-weight: bold;
+  font-size: .8rem;
+}
+.scoreBoard h1{
+  font-family: 'Oswald', sans-serif;
+  color: #dfdccd;
+  margin: 0px;
+  padding: 0px;
+}
+.rackNumber h2{
+  color: #505049;
+  font-family: 'Oswald', sans-serif;
+}
+.skillLevel{
+  color: #dfdccd;
+  font-weight: bold;
+  font-size: .9rem;
 }
