@@ -3,20 +3,21 @@ import { InitialBallStates } from "./InitialBallStates"
 import { ballIcons } from "./BallIcons"
 import { Player } from "./Player"
 import PlayerCard from "./PlayerCard"
+import UseLocalStorage from "../hooks/UseLocalStorage"
 import { defaultPlayerOne, defaultPlayerTwo } from "./DefaultPlayers"
 import logo from '../assets/logo.png'
 
 
 
 export default function ScoreKeeper(){
-    const [ballStates, setBallStates] = useState(InitialBallStates)
+    const [ballStates, setBallStates] = UseLocalStorage("ballStates", InitialBallStates)
     const [nineIsPotted, setNineIsPotted] = useState(false)
     const [winner, setWinner] = useState()
     const [rackNumber, setRackNumber] = useState(1)
     const [deadBalls, setDeadBalls] = useState([])
     const [showWinnerModal, setShowWinnerModal] = useState(false)
-    const [playerOne, setPlayerOne] = useState(Player)
-    const [playerTwo, setPlayerTwo] = useState(Player)
+    const [playerOne, setPlayerOne] = UseLocalStorage("playerOne", Player)
+    const [playerTwo, setPlayerTwo] = UseLocalStorage("playerTwo", Player)
     const [playerOneActive, setPlayerOneActive] = useState(true)
     const skillPointsKey = [null, 14, 19, 25, 31, 38, 46, 55, 65, 75]
     const skillLevels = [
@@ -35,7 +36,9 @@ export default function ScoreKeeper(){
     const playerOneSkillRef = useRef()
     const playerTwoNameRef = useRef()
     const playerTwoSkillRef = useRef()
-    
+    const oneFiltered = ballStates.filter(ball => playerOne.rackBallsPotted.includes(ball.id))
+    const twoFiltered = ballStates.filter(ball => playerTwo.rackBallsPotted.includes(ball.id))
+
     useEffect(() => {
         if (playerOne.winner === true) {
             setWinner(playerOne.name)
@@ -301,7 +304,8 @@ export default function ScoreKeeper(){
             <div className="row mb-5">
                 <div className="col d-flex">
                     <button type="button" className={'flex-fill btn ' + (!nineIsPotted ? 'btn-secondary' : 'btn-outline-secondary')} onClick={nineIsPotted ? undefined : turnOver}>Turn Over</button>
-                    <button type="button" className={'flex-fill btn ' + (nineIsPotted ? 'btn-primary' : 'btn-outline-primary')} disabled={!nineIsPotted} onClick={nineIsPotted ? newRack : undefined}>Start New Rack</button>
+                    <button type="button" className={'flex-fill btn ' + (nineIsPotted ? 'btn-secondary' : 'btn-outline-secondary')} disabled={!nineIsPotted} onClick={nineIsPotted ? newRack : undefined}>Start New Rack</button>
+                    <button type="button" className='flex-fill btn btn-outline-secondary' data-bs-toggle="modal" data-bs-target="#editRackModal">Edit Rack</button>
                 </div>
             </div>
             <div className="row">
@@ -349,13 +353,6 @@ export default function ScoreKeeper(){
                                     </select>
                                 </div>
                             </div>
-                            {/*
-                            <div>
-                                <label class="switch">
-                                <input type="checkbox"/>
-                                <span class="slider round"></span>
-                                </label>
-                            </div>*/}
                         </div>
                         <div className="modal-footer">
                             <button type="button" className="btn btn-primary" onClick={addPlayers } data-bs-dismiss="modal">Add Players</button>
@@ -364,15 +361,50 @@ export default function ScoreKeeper(){
                     </div>
                 </div>
             </div>
-            
-            <div>
-                <div className="modal">
-                    <div>
-                        <div>
-                            <p>And the winner is {winner ? winner : "Unknown"}!</p>
-                                {/*<button type="button" className="btn btn-outline-primary" mode="outlined" onClick={clearAll}>Start New Match</button>*/}
-                            <button type="button" className="btn btn-outline-primary" mode="outlined" onClick={() => setShowWinnerModal(false)}>Go back to turn</button>
+            <div className="modal fade" id="editRackModal">
+                <div className="modal-dialog">
+                    <div className="modal-content">
+                        <div className="modal-body">
+                            Edit Rack
                         </div>
+                        <div className="row d-flex justify-content-start">
+                                <div className="col-6">
+                                    <p>Player One</p>
+                                    <div>
+                                    {ballStates.map((ballState) => {
+                                        if(playerOne.rackBallsPotted.includes(ballState.id)){
+                                            return (
+                                                <div className="col-4 col-sm-2 ballImg mb-2">
+                                                    <img key={ballState.id} src={ballState.image} alt=""/>
+                                                </div>
+                                            )
+                                        } else {
+                                            return
+                                        }
+                                    })}
+                                    </div>
+                                </div>
+                                <div className="col-6">
+                                    <p>Player Two</p>
+                                    <div>
+                                    {ballStates.map((ballState) => {
+                                        if(playerTwo.rackBallsPotted.includes(ballState.id)){
+                                            return (
+                                                <div className="col-4 col-sm-2 ballImg mb-2">
+                                                    <img key={ballState.id} src={ballState.image} alt=""/>
+                                                </div>
+                                            )
+                                        } else {
+                                            return
+                                        }
+                                    })}
+                                    </div>
+                                </div>
+                            </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Done</button>
+                            
+                        </div>    
                     </div>
                 </div>
             </div>
