@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react"
 import { InitialBallStates } from "./InitialBallStates"
 import { ballIcons } from "./BallIcons"
+import { BallImages } from "./BallImages"
 import { Player } from "./Player"
 import PlayerCard from "./PlayerCard"
 import UseLocalStorage from "../hooks/UseLocalStorage"
@@ -258,7 +259,7 @@ export default function ScoreKeeper(){
             {/*PLAYER ONE*/}
             <PlayerCard
                 playerActive={playerOneActive}
-                playerName={playerOne.name}
+                playerName={playerOne.name}x
                 rackBallsPotted={playerOne.rackBallsPotted}
                 skillLevel={playerOne.skillLevel !== null ? playerOne.skillLevel : 0}
                 pointsNeeded={playerOne.pointsNeeded}
@@ -316,7 +317,7 @@ export default function ScoreKeeper(){
                 </div>
             </div>
 
-            {/*MODALS*/}
+            {/*EDIT PLAYERS MODAL*/}
             <div className="modal fade" id="editPlayersModal">
                 <div className="modal-dialog">
                     <div className="modal-content">
@@ -361,42 +362,54 @@ export default function ScoreKeeper(){
                     </div>
                 </div>
             </div>
+
+            {/*EDIT RACK MODAL*/}
             <div className="modal fade" id="editRackModal">
                 <div className="modal-dialog">
                     <div className="modal-content">
                         <div className="modal-body">
                             Edit Rack
                         </div>
-                        <div className="row d-flex justify-content-start">
-                                <div className="col-6">
+                        <div className="row d-flex justify-content-center">
+                                <div className="col-4">
                                     <p>Player One</p>
                                     <div>
-                                    {ballStates.map((ballState) => {
-                                        if(playerOne.rackBallsPotted.includes(ballState.id)){
-                                            return (
-                                                <div className="col-4 col-sm-2 ballImg mb-2">
-                                                    <img key={ballState.id} src={ballState.image} alt=""/>
-                                                </div>
-                                            )
-                                        } else {
-                                            return
-                                        }
+                                    {playerOne.rackBallsPotted.map((ball) => {
+                                        const source = BallImages[ball].img
+                                        console.log(source)
+                                        return (
+                                            <div className="ballImg mb-2">
+                                                <img key={ball} src={source} alt=""/>
+                                            </div>
+                                        )
+                                    })}
+                                    </div>
+                            </div>
+                            <div className="col-4">
+                                    <p>Dead Balls</p>
+                                    <div>
+                                    {deadBalls.map((ball) => {
+                                        const source = BallImages[ball].img
+                                        console.log(source)
+                                        return (
+                                            <div className="ballImg mb-2">
+                                                <img key={ball} src={source} alt=""/>
+                                            </div>
+                                        )
                                     })}
                                     </div>
                                 </div>
-                                <div className="col-6">
+                                <div className="col-4">
                                     <p>Player Two</p>
-                                    <div>
-                                    {ballStates.map((ballState) => {
-                                        if(playerTwo.rackBallsPotted.includes(ballState.id)){
-                                            return (
-                                                <div className="col-4 col-sm-2 ballImg mb-2">
-                                                    <img key={ballState.id} src={ballState.image} alt=""/>
-                                                </div>
-                                            )
-                                        } else {
-                                            return
-                                        }
+                                <div>
+                                    {playerTwo.rackBallsPotted.map((ball) => {
+                                        const source = BallImages[ball].img
+                                        console.log(source)
+                                        return (
+                                            <div className="ballImg mb-2">
+                                                <img key={ball} src={source} alt=""/>
+                                            </div>
+                                        )
                                     })}
                                     </div>
                                 </div>
