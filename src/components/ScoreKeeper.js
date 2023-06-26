@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from "react"
 import { InitialBallStates } from "./InitialBallStates"
 import { ballIcons } from "./BallIcons"
 import { Player } from "./Player"
+import PlayerCard from "./PlayerCard"
 import { defaultPlayerOne, defaultPlayerTwo } from "./DefaultPlayers"
-import { playerCard } from "./playerCard"
 import logo from '../assets/logo.png'
 
 
@@ -248,9 +248,12 @@ export default function ScoreKeeper(){
 
     return (
         <div className="centerTxt">  
-            <div className="row"><img src={logo} alt="" /></div>
-        
-            <playerCard
+            <div className="row mb-2 mt-2 d-flex justify-content-center">
+                <div className="col-7" id="logoWrap"><img src={logo} alt="" /></div>
+            </div>
+
+            {/*PLAYER ONE*/}
+            <PlayerCard
                 playerActive={playerOneActive}
                 playerName={playerOne.name}
                 rackBallsPotted={playerOne.rackBallsPotted}
@@ -260,87 +263,19 @@ export default function ScoreKeeper(){
                 skillPoints={playerOne.skillPoints}
             />    
 
-
-            {/*PLAYER ONE*/}
-            <div className="row d-flex justify-content-center playerWrapper">
-                <div className="playerContainer col-11 mb-2">
-                    <div className="row">
-                    <div className="col-1 d-flex align-items-center" style={playerOneActive ? inlineStyles.activePlayer : inlineStyles.inActivePlayer}>{playerOneActive && <span>&#9733;</span>}</div>
-                    <div className="col-9 d-flex flex-column">
-                        <div className="row flex-grow-1 align-items-center">
-                                <p className="playerName">
-                                    {playerOne.name !== null ? playerOne.name : "Player 1"}
-                                </p>
-                        </div>
-                        <div className="row flex-grow-1">
-                            <div className="col d-flex justify-content-center align-items-center">
-                                {playerOne.rackBallsPotted.length > 0 && playerOne.rackBallsPotted.sort((a, b) => a - b).map((ballNum) => {
-                                    return(
-                                        <img src={ballIcons[ballNum].icon} alt="" className="icon ms-1"/>
-                                    )
-                                })}
-                                </div>
-                            <div className="col d-flex justify-content-center align-items-center skillLevel">
-                                SL {playerOne.skillLevel !== null ? playerOne.skillLevel : 0}
-                            </div>
-                            <div className="col toWin d-flex justify-content-center align-items-center">
-                                <div className="col">{playerOne.pointsNeeded} TO WIN</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="col-2 scoreBoard">
-                        <div className="row" style={{ backgroundColor: '#838370' }}>
-                                <h1>{playerOne.totalPoints}</h1>
-                        </div>
-                        <div className="row" style={{ backgroundColor: '#6d828f' }}>
-                            <h1>{playerOne.skillPoints}</h1>
-                        </div>
-                    </div>
-                    </div>                    
-                </div>
-            </div>
-
             {/*PLAYER TWO*/}
-            <div className="row d-flex justify-content-center playerWrapper">
-                <div className="playerContainer col-11 mb-2">
-                    <div className="row">
-                     <div className="col-1 d-flex align-items-center" style={!playerOneActive ? inlineStyles.activePlayer : inlineStyles.inActivePlayer}>{!playerOneActive && <span>&#9733;</span>}</div>
-                    <div className="col-9 d-flex flex-column">
-                        <div className="row flex-grow-1 align-items-center">
-                                <p className="playerName">
-                                    {playerTwo.name !== null ? playerTwo.name : "Player 1"}
-                                </p>
-                        </div>
-                        <div className="row flex-grow-1">
-                            <div className="col d-flex justify-content-center align-items-center">
-                                {playerTwo.rackBallsPotted.length > 0 && playerTwo.rackBallsPotted.sort((a, b) => a - b).map((ballNum) => {
-                                    return(
-                                        <img src={ballIcons[ballNum].icon} alt="" className="icon ms-1"/>
-                                    )
-                                })}
-                                </div>
-                            <div className="col d-flex justify-content-center align-items-center skillLevel">
-                                SL {playerOne.skillLevel !== null ? playerOne.skillLevel : 0}
-                            </div>
-                            <div className="col toWin d-flex justify-content-center align-items-center">
-                                <div className="col">{playerTwo.pointsNeeded} TO WIN</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="col-2 scoreBoard">
-                        <div className="row" style={{ backgroundColor: '#838370' }}>
-                                <h1>{playerTwo.totalPoints}</h1>
-                        </div>
-                        <div className="row" style={{ backgroundColor: '#6d828f' }}>
-                            <h1>{playerTwo.skillPoints}</h1>
-                        </div>
-                    </div>
-                    </div>                    
-                </div>
-            </div>
+            <PlayerCard
+                playerActive={!playerOneActive}
+                playerName={playerTwo.name}
+                rackBallsPotted={playerTwo.rackBallsPotted}
+                skillLevel={playerTwo.skillLevel !== null ? playerTwo.skillLevel : 0}
+                pointsNeeded={playerTwo.pointsNeeded}
+                totalPoints={playerTwo.totalPoints}
+                skillPoints={playerTwo.skillPoints}
+            />  
 
             <div className="row">
-                <div className="col">Dead Balls:
+                <div className="col"><span className="me-1">Dead Balls:</span>
                     {deadBalls.length > 0 && deadBalls.sort((a, b) => a - b).map((ballNum) => {
                         return(
                             <img src={ballIcons[ballNum].icon} alt="" className="icon"/>
@@ -363,13 +298,17 @@ export default function ScoreKeeper(){
             </div>
 
             {/*BUTTONS*/}
+            <div className="row mb-5">
+                <div className="col d-flex">
+                    <button type="button" className={'flex-fill btn ' + (!nineIsPotted ? 'btn-secondary' : 'btn-outline-secondary')} onClick={nineIsPotted ? undefined : turnOver}>Turn Over</button>
+                    <button type="button" className={'flex-fill btn ' + (nineIsPotted ? 'btn-primary' : 'btn-outline-primary')} disabled={!nineIsPotted} onClick={nineIsPotted ? newRack : undefined}>Start New Rack</button>
+                </div>
+            </div>
             <div className="row">
-                <div className="col">
-                    <button type="button" className="btn btn-outline-primary" onClick={clearAll}>Clear Everything</button>
-                    <button type="button" className="btn btn-outline-primary" onClick={nineIsPotted ? undefined : turnOver}>Turn Over</button>
-                    <button type="button" className={'btn ' + (nineIsPotted ? 'btn-primary' : 'btn-outline-primary')} onClick={nineIsPotted ? newRack : undefined}>Start New Rack</button>
-                    <button type="button" className="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editPlayersModal">Edit Players</button>
-                        <button type="button" className="btn btn-outline-primary" onClick={loadDefault} >Load Default Players</button>
+                <div className="col d-flex">
+                    <button type="button" className="flex-fill btn btn-outline-primary" onClick={clearAll}>Clear Everything</button>
+                    <button type="button" className="flex-fill btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editPlayersModal">Edit Players</button>
+                        <button type="button" className="flex-fill btn btn-outline-primary" onClick={loadDefault} >Load Default Players</button>
                 </div>
             </div>
 

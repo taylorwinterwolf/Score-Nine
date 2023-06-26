@@ -9,7 +9,7 @@ body{
   margin: 5px;
 }
 .ballsContainer {
-  padding: 10px 5px;
+  padding: 0px 5px;
 }
 .ballImg{
   position: relative;
@@ -46,6 +46,7 @@ body{
 .icon{
   max-width: 15px;
   max-height: 15px;
+  margin-right:2px;
 }
 .switch {
   position: relative;
@@ -127,17 +128,20 @@ input:checked+.slider:before {
   font-size: .8rem;
 }
 .scoreBoard h1{
-  font-family: 'Oswald', sans-serif;
+  font-family: 'Belanosima', sans-serif;
   color: #dfdccd;
   margin: 0px;
   padding: 0px;
 }
 .rackNumber h2{
   color: #505049;
-  font-family: 'Oswald', sans-serif;
+  font-family: 'Belanosima', sans-serif;
 }
 .skillLevel{
   color: #dfdccd;
   font-weight: bold;
   font-size: .9rem;
+}
+#logoWrap img{
+  width: 100%;
 }
