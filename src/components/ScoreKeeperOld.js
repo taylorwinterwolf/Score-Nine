@@ -2,22 +2,24 @@ import React, { useState, useEffect, useRef } from "react"
 import { InitialBallStates } from "./InitialBallStates"
 import { ballIcons } from "./BallIcons"
 import { BallImages } from "./BallImages"
+import { Player } from "./Player"
 import PlayerCard from "./PlayerCard"
 import UseLocalStorage from "../hooks/UseLocalStorage"
-import { defaultPlayers } from "./DefaultPlayers"
+import { defaultPlayerOne, defaultPlayerTwo } from "./DefaultPlayers"
 import logo from '../assets/logo.png'
 
 
 
-export default function ScoreKeeper() {
-    const [playerOneActive, setPlayerOneActive] = useState(true)
+export default function ScoreKeeper(){
     const [ballStates, setBallStates] = UseLocalStorage("ballStates", InitialBallStates)
     const [nineIsPotted, setNineIsPotted] = useState(false)
     const [winner, setWinner] = useState()
     const [rackNumber, setRackNumber] = useState(1)
-    const [deadBalls, setDeadBalls] = UseLocalStorage("deadBalls", [])
-    const [players, setPlayers] = UseLocalStorage('players', defaultPlayers)
-
+    const [deadBalls, setDeadBalls] = useState([])
+    const [showWinnerModal, setShowWinnerModal] = useState(false)
+    const [playerOne, setPlayerOne] = UseLocalStorage("playerOne", Player)
+    const [playerTwo, setPlayerTwo] = UseLocalStorage("playerTwo", Player)
+    const [playerOneActive, setPlayerOneActive] = useState(true)
     const skillPointsKey = [null, 14, 19, 25, 31, 38, 46, 55, 65, 75]
     const skillLevels = [
         {label: 'SL 1', value: 1},
@@ -36,113 +38,137 @@ export default function ScoreKeeper() {
     const playerTwoNameRef = useRef()
     const playerTwoSkillRef = useRef()
 
-    /*
     useEffect(() => {
-        if (players[1].winner === true) {
-            setWinner(players[1].name)
-        }else if (players[2].winner === true) {
-            setWinner(players[2].name)
+        if (playerOne.winner === true) {
+            setWinner(playerOne.name)
+            setShowWinnerModal(true)
+        }else if (playerTwo.winner === true) {
+            setWinner(playerTwo.name)
+            setShowWinnerModal(true)
         }
-    }, [players[1].winner, players[2].winner])
-    */
+    }, [playerOne.winner, playerTwo.winner])
+
 
     const updateScore = (ballState) => {
-
-        const currentState = ballState.currentState
-
-        let newState = 'default'
         
-        switch (currentState) {
-        case 'default':
-            newState = "potted";
-            break;
-        case 'potted':
-            newState = "dead";
-            break;
-        default:
-            newState = "default";
-            break;
-        } 
-
-        const activePlayerNumber = playerOneActive ? 1 : 2
-        if (newState === 'potted') {
-            setPlayerAddBall(activePlayerNumber, ballState.id)
-        } else if (newState === 'dead') {
-            setPlayerRemoveBall(activePlayerNumber, ballState.id)
-        }
-    }
-
-    function setPlayerAddBall(playerID, ballID) {
-        const ballValue = ballID === 9 ? 2 : 1
+        updateBallState(ballState.id);
     
-        setPlayers(prevPlayers => {
-        const updatedPlayers = [...prevPlayers]
-        updatedPlayers[playerID] = {
-            ...updatedPlayers[playerID],
-            totalPoints: prevPlayers[playerID].totalPoints + ballValue,
-            
-            pointsNeeded: prevPlayers[playerID].skillPoints - (prevPlayers[playerID].totalPoints + ballValue) > 0
-            ? prevPlayers[playerID].skillPoints - (prevPlayers[playerID].totalPoints + ballValue) : 0,
-            
-            rackBallsPotted: [...prevPlayers[playerID].rackBallsPotted, ballID],
-
-            winner: prevPlayers[playerID].skillPoints - (prevPlayers[playerID].totalPoints + ballValue) === 0
-            ? true
-            : false
-        }
-            return updatedPlayers
-        })
-        
-    }
-
-    function setPlayerRemoveBall(playerID, ballID) {
-        const ballValue = ballID === 9 ? 2 : 1
+        let ballValue = 0
     
-        setPlayers(prevPlayers => {
-        const updatedPlayers = [...prevPlayers]
-            updatedPlayers[playerID] = {
-                ...updatedPlayers[playerID],
-                totalPoints: prevPlayers[playerID].totalPoints - ballValue,
-                pointsNeeded: prevPlayers[playerID].pointsNeeded + ballValue,
-                rackBallsPotted: prevPlayers[playerID].rackBallsPotted.filter(ballId => ballId !== ballID),
-                deadBalls: [...prevPlayers[playerID].rackBallsPotted, ballID],
-                winner: prevPlayers[playerID].skillPoints + (prevPlayers[playerID].totalPoints + ballValue) >= 0 ? false : true
+        if (ballState.id === 9) {
+            ballValue = 2
+            //Check state of 9 ball
+            if (ballState.currentState === 'default') {
+                //If 9ball is potted, set all un-potted balls to dead
+                setBallStates((prevBallStates) => prevBallStates.map((selectedBall) => {
+                    if (selectedBall.id !== 9 && selectedBall.currentState !== 'potted') {
+                        return {
+                            ...selectedBall,
+                            currentState: 'dead'
+                        }
+                    }
+                    //Otherwise keep ball state as is
+                    return selectedBall
+                }))
+                setNineIsPotted(true)
+            } else {
+                setBallStates((prevBallStates) => prevBallStates.map((selectedBall) => {
+                    if (selectedBall.id !== 9 && selectedBall.currentState !== 'potted') {
+                        return {
+                            ...selectedBall,
+                            currentState: 'default'
+                        }
+                    }
+                    //Otherwise keep ball state as is
+                    return selectedBall
+                }))
+                setNineIsPotted(false)
             }
-            return updatedPlayers
-        })
-        setDeadBalls(prevBalls => [...prevBalls, ballID])
+            
+        } else {
+            ballValue = 1
+        }
+
+        if (playerOneActive) {
+            if (ballState.currentState === 'default') {
+                //POTTED BALL
+                setPlayerOne(prevPlayer => ({...prevPlayer,
+                    totalPoints: prevPlayer.totalPoints + ballValue <= prevPlayer.skillPoints ? prevPlayer.totalPoints + ballValue : prevPlayer.skillPoints,
+                    pointsNeeded: prevPlayer.skillPoints - (prevPlayer.totalPoints + ballValue) > 0 ? prevPlayer.skillPoints - (prevPlayer.totalPoints + ballValue) : 0,
+                    rackBallsPotted: [...prevPlayer.rackBallsPotted, ballState.id],
+                    winner: prevPlayer.skillPoints - (prevPlayer.totalPoints + ballValue) === 0 ? true : false
+                }))
+                setDeadBalls(prevBalls => prevBalls.filter(ballId => ballId !== ballState.id))
+            } else if (ballState.currentState === 'potted') {
+                //DEAD BALL
+                setPlayerOne(prevPlayer => ({ ...prevPlayer,
+                    totalPoints: prevPlayer.totalPoints - ballValue,
+                    pointsNeeded: prevPlayer.pointsNeeded + ballValue,
+                    rackBallsPotted: prevPlayer.rackBallsPotted.filter(ballId => ballId !== ballState.id),
+                    deadBalls: [...prevPlayer.rackBallsPotted, ballState.id],
+                    winner: prevPlayer.skillPoints + (prevPlayer.totalPoints + ballValue) >= 0 ? false : true
+                }))
+                if (ballState.id !== 9) {
+                    setDeadBalls(prevBalls => ([...prevBalls, ballState.id]))
+                }
+                
+            } else {
+                //RESET BALL
+                setDeadBalls(prevBalls => prevBalls.filter(ballId => ballId !== ballState.id))
+            }
+        } else {
+            if (ballState.currentState === 'default') {
+                //POTTED BALL
+                setPlayerTwo(prevPlayer => ({...prevPlayer,
+                    totalPoints: prevPlayer.totalPoints + ballValue <= prevPlayer.skillPoints ? prevPlayer.totalPoints + ballValue : prevPlayer.skillPoints,
+                    pointsNeeded: prevPlayer.skillPoints - (prevPlayer.totalPoints + ballValue) > 0 ? prevPlayer.skillPoints - (prevPlayer.totalPoints + ballValue) : 0,
+                    rackBallsPotted: [...prevPlayer.rackBallsPotted, ballState.id],
+                    winner: prevPlayer.skillPoints - (prevPlayer.totalPoints + ballValue) === 0 ? true : false
+                }))
+                setDeadBalls(prevBalls => prevBalls.filter(ballId => ballId !== ballState.id))
+            } else if (ballState.currentState === 'potted') {
+                //DEAD BALL
+                setPlayerTwo(prevPlayer => ({ ...prevPlayer,
+                    totalPoints: prevPlayer.totalPoints - ballValue,
+                    pointsNeeded: prevPlayer.pointsNeeded + ballValue,
+                    rackBallsPotted: prevPlayer.rackBallsPotted.filter(ballId => ballId !== ballState.id),
+                    deadBalls: [...prevPlayer.rackBallsPotted, ballState.id],
+                    winner: prevPlayer.skillPoints + (prevPlayer.totalPoints + ballValue) >= 0 ? false : true
+                }))
+                if (ballState.id !== 9) {
+                    setDeadBalls(prevBalls => ([...prevBalls, ballState.id]))
+                }
+                
+            } else {
+                //RESET BALL
+                setDeadBalls(prevBalls => prevBalls.filter(ballId => ballId !== ballState.id))
+            }
+        }
+
+
     }
     
     // Function to update the state of a specific ball
     const updateBallState = (ballId) => {
+        //console.log("Update ball state clicked")
+        let state = "default"
+        setBallStates((prevBallStates) =>
+        prevBallStates.map((selectedBall) => {
+            if (selectedBall.id === ballId) {
+                if (selectedBall.currentState === 'default') {
+                    state = 'potted'    
+                } else if (selectedBall.currentState === 'potted' && selectedBall.id !== 9){
+                    state = 'dead'
+                }
 
-        if (ballId === 9) {
-            setNineIsPotted(true)
-        }
-  
-        const currentState = ballStates[ballId].currentState
-
-        let state = 'default'
-        
-        switch (currentState) {
-        case 'default':
-            state = "potted";
-            break;
-        case 'potted':
-            state = "dead";
-            break;
-        default:
-            state = "default";
-            break;
-        }        
-
-        //console.log(ballStates[ballId].currentState)
-        setBallStates(prevBalls => {
-            const updatedBalls = [...prevBalls] // Clone the array
-            updatedBalls[ballId] = { ...updatedBalls[ballId], currentState: state }; // Update the currentState property
-            return updatedBalls; // Return the updated array
+                return {
+                    ...selectedBall,
+                    currentState: state,
+                };
+            }
+            return selectedBall;
         })
-
+        )
     }
 
     // Function to get the appropriate image based on the ball state
@@ -157,9 +183,7 @@ export default function ScoreKeeper() {
         }
     };
 
-        
     const addPlayers = () => {
-        /*
         setPlayerOne(prevPlayer => ({
             ...prevPlayer,
             name: playerOneNameRef.current.value,
@@ -167,43 +191,47 @@ export default function ScoreKeeper() {
             skillPoints: skillPointsKey[playerOneSkillRef.current.value],
             pointsNeeded: skillPointsKey[playerOneSkillRef.current.value]
         }))
-        */
+        setPlayerTwo(prevPlayer => ({
+            ...prevPlayer,
+            name: playerTwoNameRef.current.value,
+            skillLevel: playerTwoSkillRef.current.value,
+            skillPoints: skillPointsKey[playerTwoSkillRef.current.value],
+            pointsNeeded: skillPointsKey[playerTwoSkillRef.current.value]
+        }))
+    }
+
+    const loadDefault = () => {
+        setPlayerOne(defaultPlayerOne)
+        setPlayerTwo(defaultPlayerTwo)
     }
 
     const turnOver = () => {
         //Toggle which player is active
         setPlayerOneActive(prevValue => !prevValue)
         
-        const ballsDown = [...players[1].rackBallsPotted, ...players[2].rackBallsPotted, ...deadBalls]
-        console.log(ballsDown)
-        setBallStates(prevBalls => prevBalls.map((ball, index) => (
-            ballsDown.includes(index) && index !== 0 ? { ...ball, archived: true} : ball
-        )));
+        //Filter out(remove) the balls that have already been potted this rack
+        const ballsDown = [...playerOne.rackBallsPotted, ...playerTwo.rackBallsPotted, ...deadBalls]
+        setBallStates(prevBallStates => prevBallStates.filter(ball => !ballsDown.includes(ball.id)))
     }
 
     const clearAll = () => {
+        setShowWinnerModal(false)
         setBallStates(InitialBallStates)
         setPlayerOneActive(true)
         setNineIsPotted(false)
+        setPlayerOne(Player)
+        setPlayerTwo(Player)
         setRackNumber(1)
         setDeadBalls([])
-        setPlayers(defaultPlayers)
     }
 
     const newRack = () => {  
         setBallStates(InitialBallStates)
+        setPlayerOne(prevPlayer => ({...prevPlayer, rackBallsPotted: []}))
+        setPlayerTwo(prevPlayer => ({...prevPlayer, rackBallsPotted: []}))
         setNineIsPotted(false)
         setRackNumber(prevNumber => prevNumber + 1)
         setDeadBalls([])
-        setPlayers(prevPlayers => {
-            const updatedPlayers = [...prevPlayers]
-            updatedPlayers[1].rackBallsPotted = []
-            updatedPlayers[1].deadBalls = []
-            updatedPlayers[2].rackBallsPotted = []
-            updatedPlayers[2].deadBalls = []
-            return updatedPlayers
-        })
-
     } 
 
     const inlineStyles = {
@@ -218,6 +246,9 @@ export default function ScoreKeeper() {
         }
     }
 
+    //console.log("PLAYER ONE: ", JSON.stringify(playerOne, null, 2))
+    //console.log("PLAYER TWO: ", JSON.stringify(playerTwo, null, 2)) 
+
     return (
         <div className="centerTxt">  
             <div className="row mb-2 mt-2 d-flex justify-content-center">
@@ -227,23 +258,23 @@ export default function ScoreKeeper() {
             {/*PLAYER ONE*/}
             <PlayerCard
                 playerActive={playerOneActive}
-                playerName={players[1].name}
-                rackBallsPotted={players[1].rackBallsPotted}
-                skillLevel={players[1].skillLevel !== null ? players[1].skillLevel : 0}
-                pointsNeeded={players[1].pointsNeeded}
-                totalPoints={players[1].totalPoints}
-                skillPoints={players[1].skillPoints}
+                playerName={playerOne.name}x
+                rackBallsPotted={playerOne.rackBallsPotted}
+                skillLevel={playerOne.skillLevel !== null ? playerOne.skillLevel : 0}
+                pointsNeeded={playerOne.pointsNeeded}
+                totalPoints={playerOne.totalPoints}
+                skillPoints={playerOne.skillPoints}
             />    
 
             {/*PLAYER TWO*/}
             <PlayerCard
                 playerActive={!playerOneActive}
-                playerName={players[2].name}
-                rackBallsPotted={players[2].rackBallsPotted}
-                skillLevel={players[2].skillLevel !== null ? players[2].skillLevel : 0}
-                pointsNeeded={players[2].pointsNeeded}
-                totalPoints={players[2].totalPoints}
-                skillPoints={players[2].skillPoints}
+                playerName={playerTwo.name}
+                rackBallsPotted={playerTwo.rackBallsPotted}
+                skillLevel={playerTwo.skillLevel !== null ? playerTwo.skillLevel : 0}
+                pointsNeeded={playerTwo.pointsNeeded}
+                totalPoints={playerTwo.totalPoints}
+                skillPoints={playerTwo.skillPoints}
             />  
 
             <div className="row">
@@ -256,36 +287,24 @@ export default function ScoreKeeper() {
                 </div>
             </div>
             
-
-
-
             {/*AVAILABLE BALLS*/}
             <div className="row ballsContainer d-flex justify-content-center">
                 <div className="rackNumber"><h2>Rack Number {rackNumber}</h2></div>
                 {ballStates.map((ballState) => {
-                    if(ballState !== null && ballState.archived !== true){
-                        return (
-                            <div key={ballState.id} onClick={nineIsPotted ? undefined : () => { updateBallState(ballState.id); updateScore(ballState); }}
- className="col-4 col-sm-2 ballImg mb-2">
-                                <img src={BallImages[ballState.id].img} alt=""/>
-                                <img className="overlayImage" src={getOverlayImage(ballState)} alt=""/>
-                            </div>
-                        )
-                    }
+                    return (
+                        <div onClick={nineIsPotted && ballState.id !== 9 ? undefined : () => updateScore(ballState)} className="col-4 col-sm-2 ballImg mb-2">
+                            <img key={ballState.id} src={ballState.image} alt=""/>
+                            <img className="overlayImage" src={getOverlayImage(ballState)} alt=""/>
+                        </div>
+                    );
                 })}
             </div>
-
-
-
-
 
             {/*BUTTONS*/}
             <div className="row mb-5">
                 <div className="col d-flex">
                     <button type="button" className={'flex-fill btn ' + (!nineIsPotted ? 'btn-secondary' : 'btn-outline-secondary')} onClick={nineIsPotted ? undefined : turnOver}>Turn Over</button>
-
-                    <button type="button" className={'flex-fill btn ' + (nineIsPotted ? 'btn-secondary' : 'btn-outline-secondary')} disabled={!nineIsPotted} onClick={newRack}>Start New Rack</button>
-
+                    <button type="button" className={'flex-fill btn ' + (nineIsPotted ? 'btn-secondary' : 'btn-outline-secondary')} disabled={!nineIsPotted} onClick={nineIsPotted ? newRack : undefined}>Start New Rack</button>
                     <button type="button" className='flex-fill btn btn-outline-secondary' data-bs-toggle="modal" data-bs-target="#editRackModal">Edit Rack</button>
                 </div>
             </div>
@@ -293,6 +312,7 @@ export default function ScoreKeeper() {
                 <div className="col d-flex">
                     <button type="button" className="flex-fill btn btn-outline-primary" onClick={clearAll}>Clear Everything</button>
                     <button type="button" className="flex-fill btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editPlayersModal">Edit Players</button>
+                        <button type="button" className="flex-fill btn btn-outline-primary" onClick={loadDefault} >Load Default Players</button>
                 </div>
             </div>
 
@@ -353,7 +373,7 @@ export default function ScoreKeeper() {
                                 <div className="col-4">
                                     <p>Player One</p>
                                     <div>
-                                    {players[1].rackBallsPotted.map((ballNum) => {
+                                    {playerOne.rackBallsPotted.map((ballNum) => {
                                         const source = BallImages[ballNum].img
                                         return (
                                             <div className="ballImg mb-2" onClick={() => updateScore()}>
@@ -379,7 +399,7 @@ export default function ScoreKeeper() {
                                 <div className="col-4">
                                     <p>Player Two</p>
                                 <div>
-                                    {players[2].rackBallsPotted.map((ball) => {
+                                    {playerTwo.rackBallsPotted.map((ball) => {
                                         const source = BallImages[ball].img
                                         return (
                                             <div className="ballImg mb-2">
