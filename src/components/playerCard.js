@@ -29,7 +29,7 @@ export default function PlayerCard({ playerActive, playerName, rackBallsPotted, 
                             <div className="col d-flex justify-content-center align-items-center">
                             {rackBallsPotted.length > 0 && rackBallsPotted.sort((a, b) => a - b).map((ballNum) => {
                                 return(
-                                    <img src={ballIcons[ballNum].icon} alt="" className="icon ms-1"/>
+                                    <img key={ballNum} src={ballIcons[ballNum].icon} alt="" className="icon ms-1"/>
                                 )
                             })}
                         </div>

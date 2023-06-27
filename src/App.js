@@ -1,11 +1,11 @@
 import logo from './logo.svg';
 import './App.css';
-import ScoreKeeper from './components/ScoreKeeper';
+import ScoreNine from './components/ScoreNine';
 
 function App() {
   return (
     <div className="container">
-      <ScoreKeeper/>
+      <ScoreNine/>
     </div>
   );
 }

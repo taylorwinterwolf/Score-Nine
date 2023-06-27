@@ -3,13 +3,14 @@ import { InitialBallStates } from "./InitialBallStates"
 import { ballIcons } from "./BallIcons"
 import { BallImages } from "./BallImages"
 import PlayerCard from "./PlayerCard"
+import EditRack from "./EditRack"
 import UseLocalStorage from "../hooks/UseLocalStorage"
 import { defaultPlayers } from "./DefaultPlayers"
 import logo from '../assets/logo.png'
 
 
 
-export default function ScoreKeeper() {
+export default function ScoreNine() {
     const [playerOneActive, setPlayerOneActive] = useState(true)
     const [ballStates, setBallStates] = UseLocalStorage("ballStates", InitialBallStates)
     const [nineIsPotted, setNineIsPotted] = useState(false)
@@ -69,6 +70,8 @@ export default function ScoreKeeper() {
             setPlayerAddBall(activePlayerNumber, ballState.id)
         } else if (newState === 'dead') {
             setPlayerRemoveBall(activePlayerNumber, ballState.id)
+        } else {
+            setDeadBalls(prevBalls => prevBalls.filter(ballId => ballId !== ballState.id))
         }
     }
 
@@ -110,6 +113,7 @@ export default function ScoreKeeper() {
             }
             return updatedPlayers
         })
+
         setDeadBalls(prevBalls => [...prevBalls, ballID])
     }
     
@@ -175,7 +179,7 @@ export default function ScoreKeeper() {
         setPlayerOneActive(prevValue => !prevValue)
         
         const ballsDown = [...players[1].rackBallsPotted, ...players[2].rackBallsPotted, ...deadBalls]
-        console.log(ballsDown)
+        //console.log(ballsDown)
         setBallStates(prevBalls => prevBalls.map((ball, index) => (
             ballsDown.includes(index) && index !== 0 ? { ...ball, archived: true} : ball
         )));
@@ -250,7 +254,7 @@ export default function ScoreKeeper() {
                 <div className="col"><span className="me-1">Dead Balls:</span>
                     {deadBalls.length > 0 && deadBalls.sort((a, b) => a - b).map((ballNum) => {
                         return(
-                            <img src={ballIcons[ballNum].icon} alt="" className="icon"/>
+                            <img key={ballNum} src={ballIcons[ballNum].icon} alt="" className="icon"/>
                         )
                     })}
                 </div>
@@ -267,17 +271,19 @@ export default function ScoreKeeper() {
                         return (
                             <div key={ballState.id} onClick={nineIsPotted ? undefined : () => { updateBallState(ballState.id); updateScore(ballState); }}
  className="col-4 col-sm-2 ballImg mb-2">
-                                <img src={BallImages[ballState.id].img} alt=""/>
-                                <img className="overlayImage" src={getOverlayImage(ballState)} alt=""/>
+                                <img key={ballState.id} src={BallImages[ballState.id].img} alt=""/>
+                                <img key={"icon-" + ballState.id} className="overlayImage" src={getOverlayImage(ballState)} alt=""/>
                             </div>
                         )
                     }
                 })}
             </div>
 
-
-
-
+            <EditRack
+                players={players}
+                BallImages={BallImages}
+                deadBalls={deadBalls}
+            />
 
             {/*BUTTONS*/}
             <div className="row mb-5">
@@ -286,9 +292,14 @@ export default function ScoreKeeper() {
 
                     <button type="button" className={'flex-fill btn ' + (nineIsPotted ? 'btn-secondary' : 'btn-outline-secondary')} disabled={!nineIsPotted} onClick={newRack}>Start New Rack</button>
 
-                    <button type="button" className='flex-fill btn btn-outline-secondary' data-bs-toggle="modal" data-bs-target="#editRackModal">Edit Rack</button>
+                    <button type="button" className='flex-fill btn btn-outline-secondary' data-bs-toggle="collapse" data-bs-target="#editRackCollapse" aria-expanded="false" aria-controls="editRackCollapse">Edit Rack</button>
                 </div>
             </div>
+
+               
+
+
+
             <div className="row">
                 <div className="col d-flex">
                     <button type="button" className="flex-fill btn btn-outline-primary" onClick={clearAll}>Clear Everything</button>
@@ -296,107 +307,9 @@ export default function ScoreKeeper() {
                 </div>
             </div>
 
-            {/*EDIT PLAYERS MODAL*/}
-            <div className="modal fade" id="editPlayersModal">
-                <div className="modal-dialog">
-                    <div className="modal-content">
-                        <div className="modal-body">
-                            <div className="playerWrapper">
-                                <div><h5>Player 1 Name</h5></div>
-                                <div><input type="text" ref={playerOneNameRef}/></div>
-                                <div><h5>Select Skill Level</h5></div>
-                                <div>
-                                    <select ref={playerOneSkillRef}>
-                                        {skillLevels.map((option) => {
-                                            return (
-                                            <option key={option.value} value={option.value}>
-                                                {option.label}
-                                            </option>
-                                            );
-                                        })}
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="playerWrapper">
-                                <div><h5>Player 2 Name</h5></div>
-                                <div><input type="text" ref={playerTwoNameRef}/></div>
-                                <div><h5>Select Skill Level</h5></div>
-                                <div>
-                                    <select ref={playerTwoSkillRef}>
-                                        {skillLevels.map((option) => {
-                                            return (
-                                            <option key={option.value} value={option.value}>
-                                                {option.label}
-                                            </option>
-                                            );
-                                        })}
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="modal-footer">
-                            <button type="button" className="btn btn-primary" onClick={addPlayers } data-bs-dismiss="modal">Add Players</button>
-                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        </div>    
-                    </div>
-                </div>
-            </div>
+            
 
-            {/*EDIT RACK MODAL*/}
-            <div className="modal fade" id="editRackModal">
-                <div className="modal-dialog">
-                    <div className="modal-content">
-                        <div className="modal-body">
-                            Edit Rack
-                        </div>
-                        <div className="row d-flex justify-content-center">
-                                <div className="col-4">
-                                    <p>Player One</p>
-                                    <div>
-                                    {players[1].rackBallsPotted.map((ballNum) => {
-                                        const source = BallImages[ballNum].img
-                                        return (
-                                            <div className="ballImg mb-2" onClick={() => updateScore()}>
-                                                <img key={ballNum} src={source} alt=""/>
-                                            </div>
-                                        )
-                                    })}
-                                    </div>
-                            </div>
-                            <div className="col-4">
-                                    <p>Dead Balls</p>
-                                    <div>
-                                    {deadBalls.map((ball) => {
-                                        const source = BallImages[ball].img
-                                        return (
-                                            <div className="ballImg mb-2">
-                                                <img key={ball} src={source} alt=""/>
-                                            </div>
-                                        )
-                                    })}
-                                    </div>
-                                </div>
-                                <div className="col-4">
-                                    <p>Player Two</p>
-                                <div>
-                                    {players[2].rackBallsPotted.map((ball) => {
-                                        const source = BallImages[ball].img
-                                        return (
-                                            <div className="ballImg mb-2">
-                                                <img key={ball} src={source} alt=""/>
-                                            </div>
-                                        )
-                                    })}
-                                    </div>
-                                </div>
-                            </div>
-                        <div className="modal-footer">
-                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Done</button>
-                            
-                        </div>    
-                    </div>
-                </div>
-            </div>
+            
         </div>
     ) 
 }
