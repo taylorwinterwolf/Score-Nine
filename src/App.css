@@ -145,4 +145,8 @@ input:checked+.slider:before {
 #logoWrap img{
   width: 100%;
 }
+.bold{
+  font-weight: bold;
+  font-family: 'Belanosima', sans-serif;
+}
 
