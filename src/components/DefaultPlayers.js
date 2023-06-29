@@ -1,5 +1,4 @@
 export const defaultPlayers = [
-  null,
   {
     name: "One Bad Ass Player",
     rackBallsPotted: [],

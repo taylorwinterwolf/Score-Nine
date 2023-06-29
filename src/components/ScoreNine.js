@@ -14,7 +14,6 @@ export default function ScoreNine() {
     nineIsPotted,
     BallImages,
     updateBallState,
-    updatePlayers,
     getOverlayImage,
     turnOver,
     newRack,
@@ -44,23 +43,23 @@ export default function ScoreNine() {
       {/*PLAYER ONE*/}
       <PlayerCard
         playerActive={playerOneActive}
+        playerName={players[0].name}
+        rackBallsPotted={players[0].rackBallsPotted}
+        skillLevel={players[0].skillLevel !== null ? players[0].skillLevel : 0}
+        pointsNeeded={players[0].pointsNeeded}
+        totalPoints={players[0].totalPoints}
+        skillPoints={players[0].skillPoints}
+      />
+
+      {/*PLAYER TWO*/}
+      <PlayerCard
+        playerActive={!playerOneActive}
         playerName={players[1].name}
         rackBallsPotted={players[1].rackBallsPotted}
         skillLevel={players[1].skillLevel !== null ? players[1].skillLevel : 0}
         pointsNeeded={players[1].pointsNeeded}
         totalPoints={players[1].totalPoints}
         skillPoints={players[1].skillPoints}
-      />
-
-      {/*PLAYER TWO*/}
-      <PlayerCard
-        playerActive={!playerOneActive}
-        playerName={players[2].name}
-        rackBallsPotted={players[2].rackBallsPotted}
-        skillLevel={players[2].skillLevel !== null ? players[2].skillLevel : 0}
-        pointsNeeded={players[2].pointsNeeded}
-        totalPoints={players[2].totalPoints}
-        skillPoints={players[2].skillPoints}
       />
 
       <div className="row">
@@ -114,7 +113,7 @@ export default function ScoreNine() {
         })}
       </div>
 
-      <EditRack />
+      {/*<EditRack />*/}
 
       {/*BUTTONS*/}
       <div className="row mb-5">
