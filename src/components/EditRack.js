@@ -1,49 +1,69 @@
-import { useState } from "react"
 import { useScoreNine } from "../contexts/ScoreNineContext"
 
+
 export default function EditRack() {
-  const { editBalls, players, BallImages, deadBalls, setEditBalls } = useScoreNine();
-  let optionTxt = ["", "", ""]
-  const [ballClickCount, updateBallClickCount] = useState([])
+  const { players, BallImages, deadBalls, ballsToUpdate, setBallsToUpdate, editRack } = useScoreNine();
   
-  function updateEditBalls(ballID, currentState, currentOwner) {
+  
+  function switchBallOptions(ballID, currentState, currentOwner) {
     console.log("Ball ID: ", ballID, "Current Owner: ", currentOwner, "Current State: ", currentState)
-    
-    updateBallClickCount((prevBallClickCount) => {
-      const newCount = [...prevBallClickCount];
-      newCount.push({ id: ballID });
-      return newCount;
-    })
-    
-    let newOwner = 4
-    //Player 1
-    switch (ballClickCount) {
+    const ballIndex = ballID - 1
+    let optionTxt = ""
+    let newOwner = null
+
+    switch (ballsToUpdate[ballIndex].clicks) {
       case 0:
-        newOwner = 1
-        optionTxt[0] = "Other's Ball"
+        //First Click
+        if (currentOwner === 3) {
+          optionTxt = "Player 1 Ball"
+          newOwner = 0
+        } else {
+          optionTxt = "Other's Ball"
+          newOwner = currentOwner === 0 ? 1 : 0
+        }
         break
       case 1:
-        newOwner = 3
-        optionTxt[0] = "Dead Ball"
+        //Second Click
+        if (currentOwner === 3) {
+          optionTxt = "Player 2 Ball"
+          newOwner = 1
+        } else {
+          if (ballID !== 9) {
+            optionTxt = "Dead"
+            newOwner = 3
+          } else {
+            optionTxt = "Reset"
+            newOwner = null
+          }
+        }
         break
       case 2:
-        newOwner = 4
-        optionTxt[0] = "Reset"
+        //Third Click
+        optionTxt = "Reset"
+        newOwner = null
+        break
+      case 3:
+        //Fourth Click Clear everything
+        optionTxt = ""
+        newOwner = null
         break
       default:
+        optionTxt = ""
+        newOwner = null
         break
     }
 
-    /*
-    setEditBalls((prevEditBalls) => {
-      const newEntry = { id: ballID, currentState, currentOwner, newOwner }
-      const updatedBalls = prevEditBalls.filter((ball) => ball.id !== ballID)
-      updatedBalls.push(newEntry)
+    setBallsToUpdate((prevBalls) => {
+    const updatedBalls = [...prevBalls]
+    updatedBalls[ballIndex] = {
+      ...updatedBalls[ballIndex],
+      clicks: prevBalls[ballIndex].clicks + 1 > 3 ? 0 : prevBalls[ballIndex].clicks + 1,
+      optionTxt,
+      currentOwner,
+      newOwner
+    }
       return updatedBalls
     })
-    */
-    console.log("Edit Balls: ", editBalls)
-    console.log("Ball Click Count: ", ballClickCount)
   }
 
   return (
@@ -63,14 +83,15 @@ export default function EditRack() {
                 const source = BallImages[ballNum].img
                 const currentState = 'potted'
                 const currentOwner = 0
+                const ballIndex = ballNum -1
                 return (
                   <div
                     key={"ballImgWrap-" + ballNum}
                     className="ballImg mb-2"
-                    onClick={() => updateEditBalls(ballNum, currentState, currentOwner)}
+                    onClick={() => switchBallOptions(ballNum, currentState, currentOwner)}
                   >
                     <img key={"ballImg-" + ballNum} src={source} alt="" />
-                    <p>{optionTxt[0]}</p>
+                    <p>{ballsToUpdate[ballIndex].optionTxt}</p>
                   </div>
                 );
               })}
@@ -82,15 +103,16 @@ export default function EditRack() {
             <h5 className="bold">Dead Balls</h5>
             <div>
               {deadBalls.map((ballNum) => {
-                const source = BallImages[ballNum].img;
+                const source = BallImages[ballNum].img
+                const ballIndex = ballNum -1
                 return (
                   <div
                     key={"ballImgWrap-" + ballNum}
                     className="ballImg mb-2"
-                    onClick={() => updateEditBalls(ballNum, 'dead', 3)}
+                    onClick={() => switchBallOptions(ballNum, 'dead', 3)}
                   >
                     <img key={"ballImg-" + ballNum} src={source} alt="" />
-                    <p>{optionTxt[3]}</p>
+                    <p>{ballsToUpdate[ballIndex].optionTxt}</p>
                   </div>
                 );
               })}
@@ -105,14 +127,15 @@ export default function EditRack() {
                 const source = BallImages[ballNum].img
                 const currentState = 'potted'
                 const currentOwner = 1
+                const ballIndex = ballNum -1
                 return (
                   <div
                     key={"ballImgWrap-" + ballNum}
                     className="ballImg mb-2"
-                    onClick={() => updateEditBalls(ballNum, currentState, currentOwner)}
+                    onClick={() => switchBallOptions(ballNum, currentState, currentOwner)}
                   >
                     <img key={"ballImg-" + ballNum} src={source} alt="" />
-                    <p>{optionTxt[1]}</p>
+                    <p>{ballsToUpdate[ballIndex].optionTxt}</p>
                   </div>
                 );
               })}
@@ -126,6 +149,7 @@ export default function EditRack() {
             data-bs-toggle="collapse"
             data-bs-target="#editRackCollapse"
             aria-controls="editRackCollapse"
+            onClick={editRack}
           >
             Done
           </button>
