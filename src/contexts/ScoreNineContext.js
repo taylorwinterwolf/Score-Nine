@@ -3,7 +3,8 @@ import UseLocalStorage from "../hooks/UseLocalStorage";
 import { InitialBallStates } from "../components/InitialBallStates";
 import { ballIcons } from "../components/BallIcons";
 import { BallImages } from "../components/BallImages";
-import { defaultPlayers } from "../components/DefaultPlayers";
+import { defaultPlayers } from "../components/DefaultPlayers"
+import { defaultEditRack } from "../components/DefaultEditRackBalls"
 
 const ScoreNineContext = createContext();
 
@@ -18,130 +19,39 @@ export const ScoreNineProvider = ({ children }) => {
   const [rackNumber, setRackNumber] = useState(1);
   const [deadBalls, setDeadBalls] = UseLocalStorage("deadBalls", []);
   const [players, setPlayers] = UseLocalStorage("players", defaultPlayers)
-
-  //ANYTIME UPDATE BALL STATES CHANGES, UPDATE EVERYTHING ELSE
-  
-  useEffect(() => {
-
-    updatePlayers()
-
-  }, [ballStates])
-  
-
-  function updatePlayers() {
-    console.log(ballStates)
-    
-    ballStates.forEach((ballState, index) => {
-      const ballNum = ballState.id
-      const ballValue = ballNum === 9 ? 2 : 1
-      const previousOwner = ballState.previousOwner
-      const currentOwner = ballState.currentOwner
-      //Accounting for the 0 index where player one resides
-      const previousOwnerIndex = previousOwner !== -1 || 0 ? previousOwner - 1 : 0
-      const newOwnerIndex = currentOwner !== -1 || 0 ? currentOwner - 1 : 0
-
-
-      if (previousOwner !== currentOwner) {
-        if (currentOwner === -1) {
-          //MOVE TO DEAD BALLS
-          if (ballNum !== 9) {
-            setDeadBalls((prevBalls) => {
-              const uniqueBalls = new Set([...prevBalls, ballNum]);
-              return Array.from(uniqueBalls);
-            })
-          }
-          //REMOVE BALL FROM PREVIOUS OWNER
-          removeBall(ballNum, previousOwnerIndex)
-
-          //REMOVE PREVIOUS OWNER POINTS
-          removePoints(ballValue, previousOwnerIndex)
-        } else {
-          //Ball is potted
-          //Add ball to current owner and update score
-          addBall(ballNum, newOwnerIndex)
-          addPoints()
-
-          //If previous owner is not 0
-          //Remove from previous owner and update score
-        }
-        //This means something changed
-        //Take
-      } else {
-        if (ballState.id !== 9) {
-            //If ball is reset, remove from dead
-            setDeadBalls((prevBalls) => prevBalls.filter((ballId) => ballId !== ballState.id)
-          );
-        } else {
-            //Reset Nine Ball
-            //setPlayerRemoveBall(currentOwner, ballState.id);
-        }
-      }
-    });
-    
-  }
-
-  function addBall(ballNum, atIndex) {
-    setPlayers((prevPlayers) => {
-      const updatedPlayers = [...prevPlayers];
-      updatedPlayers[atIndex] = {
-        ...updatedPlayers[atIndex],
-        rackBallsPotted: [...new Set([...prevPlayers[atIndex].rackBallsPotted, ballNum])]
-      }
-      return updatedPlayers;
-    })
-  }
-
-  function removeBall(ballNum, atIndex) {
-    setPlayers((prevPlayers) => {
-      const updatedPlayers = [...prevPlayers];
-      updatedPlayers[atIndex] = {
-        ...updatedPlayers[atIndex],
-        rackBallsPotted: prevPlayers[atIndex].rackBallsPotted.filter(
-          (ballId) => ballId !== ballNum,
-        )
-      }
-      return updatedPlayers;
-    })
-  }
-
-  function removePoints(ballValue, atIndex) {
-    setPlayers((prevPlayers) => {
-      const updatedPlayers = [...prevPlayers];
-      updatedPlayers[atIndex] = {
-        ...updatedPlayers[atIndex],
-        totalPoints:
-          prevPlayers[atIndex].totalPoints - ballValue > 0
-            ? prevPlayers[atIndex].totalPoints - ballValue
-            : 0,
-      }
-      return updatedPlayers;
-    })
-  }
-
-  function addPoints(){}
+  const [editBalls, setEditBalls] = UseLocalStorage("editBalls", [])
 
   const updateBallState = (ballNum) => {
-    const ballIndex = ballNum - 1
+    //KEY: player1 = 0, player2 = 1, deadBall = 3, reset = 4
+    const ballIndex = ballNum - 1//Because balls index starts at 0
     const currentState = ballStates[ballIndex].currentState
     let newState = 'default'
-    let newOwner = 0
+    let newOwner = 4
     let previousOwner = ballStates[ballIndex].currentOwner
 
-    if (previousOwner === 0) {
-      //Ball is potted
-      newOwner = playerOneActive ? 1 : 2
-    } else if (previousOwner === 1 || previousOwner === 2) {
-      //Ball is dead
-      newOwner = -1
+    if (previousOwner === 4) {
+      //BALL IS POTTED INCLUDING 9
+      newOwner = playerOneActive ? 0 : 1//player 1 or 2
+      updatePlayers(ballNum, previousOwner, newOwner)
+    } else if ((previousOwner === 0 || previousOwner === 1) && ballNum !== 9) {
+      //PLAYER BALL IS DEAD, BUT CAN'T BE THE 9
+      newOwner = 3//dead
+      updatePlayers(ballNum, previousOwner, newOwner)
     } else {
-      previousOwner = 0
+      //RESET BALL
+      newOwner = 4
+      updatePlayers(ballNum, previousOwner, newOwner)
+      if (ballNum === 9) {
+          setNineIsPotted(false)
+      }
+      previousOwner = 4//default
     }
 
     switch (currentState) {
         case "default":
         newState = "potted"
         if (ballNum === 9) {
-          setNineIsPotted(!nineIsPotted);
+          setNineIsPotted(true)
         }
         break;
         case "potted":
@@ -166,80 +76,127 @@ export const ScoreNineProvider = ({ children }) => {
       return updatedBalls;
     })
   }
-  
-  /*
-  function setPlayerAddBall(playerID, ballID) {
-    const ballValue = ballID === 9 ? 2 : 1;
 
+  function updatePlayers(ballNum, previousOwner, currentOwner) {
+    //console.log("In updatePlayers, Ball Number is:", ballNum, "Previous Owner: ", previousOwner, "Current Owner is: ", currentOwner)
+    const ballValue = ballNum === 9 ? 2 : 1
+
+    if (previousOwner !== currentOwner) {
+      if (currentOwner === 3) {
+        //MOVE TO DEAD BALLS
+        setDeadBalls((prevBalls) => {
+          const uniqueBalls = new Set([...prevBalls, ballNum]);
+          return Array.from(uniqueBalls);
+        })
+        //REMOVE BALL FROM PREVIOUS OWNER
+        removeBall(ballNum, previousOwner)
+
+        //REMOVE PREVIOUS OWNER POINTS
+        removePoints(ballValue, previousOwner)
+
+      } else if (currentOwner === 4) {
+
+        if (previousOwner !== 3 && previousOwner !== 4) {
+          //RESET BALL
+          resetBall(ballNum, ballValue, previousOwner)
+        }
+        
+        if (ballNum !== 9) {
+          //REMOVE FROM DEAD BALLS
+          setDeadBalls((prevBalls) => prevBalls.filter((ballId) => ballId !== ballNum))
+        } else {
+          setNineIsPotted(false)
+        }
+      } else {
+          //BALL IS POTTED
+          //ADD BALL TO CURRENT OWNER AND UPDATE SCORE
+          addBall(ballNum, currentOwner)
+          addPoints(ballValue, currentOwner)
+          //REMOVE BALL FROM PREVIOUS OWNER
+        if (previousOwner !== 3 && previousOwner !== 4) {
+           removeBall(ballNum, previousOwner)
+           //REMOVE PREVIOUS OWNER POINTS
+           removePoints(ballValue, previousOwner) 
+        }
+      }
+    }
+  }
+
+  function addBall(ballNum, atIndex) {
     setPlayers((prevPlayers) => {
       const updatedPlayers = [...prevPlayers];
-      updatedPlayers[playerID] = {
-        ...updatedPlayers[playerID],
-        totalPoints: prevPlayers[playerID].totalPoints + ballValue,
+      updatedPlayers[atIndex] = {
+        ...updatedPlayers[atIndex],
+        rackBallsPotted: [...new Set([...prevPlayers[atIndex].rackBallsPotted, ballNum])]
+      }
+      return updatedPlayers;
+    })
+  }
 
-        pointsNeeded:
-          prevPlayers[playerID].skillPoints -
-            (prevPlayers[playerID].totalPoints + ballValue) >
-          0
-            ? prevPlayers[playerID].skillPoints -
-              (prevPlayers[playerID].totalPoints + ballValue)
-            : 0,
+  function removeBall(ballNum, atIndex) {
+    console.log("Player Index: ", atIndex)
+    console.log("Players at Index: ", players[atIndex])
+    
+    setPlayers((prevPlayers) => {
+      const updatedPlayers = [...prevPlayers];
+      updatedPlayers[atIndex] = {
+        ...updatedPlayers[atIndex],
+        rackBallsPotted: prevPlayers[atIndex].rackBallsPotted.filter(
+          (ballId) => ballId !== ballNum,
+        )
+      }
+      return updatedPlayers;
+    })
+    
+  }
 
-        rackBallsPotted: ballStates
-          .filter(
-            (ballState) =>
-              ballState !== null &&
-              ballState.currentOwner === playerID &&
-              ballState.currentState === "potted"
-          )
-          .map((ballState) => ballState.id),
-
-        winner:
-          prevPlayers[playerID].skillPoints -
-            (prevPlayers[playerID].totalPoints + ballValue) ===
-          0
-            ? true
-            : false,
+  function resetBall(ballNum, ballValue, previousOwner) {
+    console.log("Ball #: ",ballNum," Ball Value: ", ballValue," Previous Owner", previousOwner)
+    setPlayers((prevPlayers) => {
+      const updatedPlayers = [...prevPlayers];
+      updatedPlayers[previousOwner] = {
+        ...updatedPlayers[previousOwner],
+        rackBallsPotted: prevPlayers[previousOwner].rackBallsPotted.filter(
+          (ballId) => ballId !== ballNum
+        ),
+        totalPoints:
+          prevPlayers[previousOwner].totalPoints - ballValue > 0
+            ? prevPlayers[previousOwner].totalPoints - ballValue
+            : 0
       };
       return updatedPlayers;
     });
   }
 
-  function setPlayerRemoveBall(playerID, ballID) {
-    const ballValue = ballID === 9 ? 2 : 1;
 
-    
+  function removePoints(ballValue, atIndex) {
     setPlayers((prevPlayers) => {
       const updatedPlayers = [...prevPlayers];
-      updatedPlayers[playerID] = {
-        ...updatedPlayers[playerID],
+      updatedPlayers[atIndex] = {
+        ...updatedPlayers[atIndex],
         totalPoints:
-          prevPlayers[playerID].totalPoints - ballValue > 0
-            ? prevPlayers[playerID].totalPoints - ballValue
+          prevPlayers[atIndex].totalPoints - ballValue > 0
+            ? prevPlayers[atIndex].totalPoints - ballValue
             : 0,
-        pointsNeeded: prevPlayers[playerID].pointsNeeded + ballValue,
-        rackBallsPotted: prevPlayers[playerID].rackBallsPotted.filter(
-          (ballId) => ballId !== ballID
-        ),
-        winner:
-          prevPlayers[playerID].skillPoints +
-            (prevPlayers[playerID].totalPoints + ballValue) >=
-          0
-            ? false
-            : true,
-      };
+      }
       return updatedPlayers;
     })
-    if (ballID !== 9) {
-      setDeadBalls((prevBalls) => {
-        const uniqueBalls = new Set([...prevBalls, ballID]);
-        return Array.from(uniqueBalls);
-      });
-    }
-
-
   }
-*/
+
+  function addPoints(ballValue, atIndex) {
+    //const currentTotal = players[atIndex].totalPoints
+    const updatedTotal = players[atIndex].totalPoints + ballValue
+    //console.log("Passed In Ball Value: ", ballValue, "Current Total: ", currentTotal, "Updated Total: ", updatedTotal)
+
+    setPlayers((prevPlayers) => {
+      const updatedPlayers = [...prevPlayers];
+      updatedPlayers[atIndex] = {
+        ...updatedPlayers[atIndex],
+        totalPoints: updatedTotal
+      }
+      return updatedPlayers;
+    })
+  }
 
   // Function to get the appropriate image based on the ball state
   const getOverlayImage = (ballState) => {
@@ -267,19 +224,17 @@ export const ScoreNineProvider = ({ children }) => {
 
   const turnOver = () => {
     //Toggle which player is active
-    setPlayerOneActive((prevValue) => !prevValue);
+    setPlayerOneActive((prevValue) => !prevValue)
 
     const ballsDown = [
+      ...players[0].rackBallsPotted,
       ...players[1].rackBallsPotted,
-      ...players[2].rackBallsPotted,
       ...deadBalls,
-    ];
-    //console.log(ballsDown)
+    ]
+    //ARCHIVE DOWNED BALLS
     setBallStates((prevBalls) =>
-      prevBalls.map((ball, index) =>
-        ballsDown.includes(index) && index !== 0
-          ? { ...ball, archived: true }
-          : ball
+      prevBalls.map((ball) =>
+        ballsDown.includes(ball.id) ? { ...ball, archived: true } : ball
       )
     );
   };
@@ -300,8 +255,8 @@ export const ScoreNineProvider = ({ children }) => {
     setDeadBalls([]);
     setPlayers((prevPlayers) => {
       const updatedPlayers = [...prevPlayers];
+      updatedPlayers[0].rackBallsPotted = [];
       updatedPlayers[1].rackBallsPotted = [];
-      updatedPlayers[2].rackBallsPotted = [];
       return updatedPlayers;
     });
   };
@@ -317,6 +272,8 @@ export const ScoreNineProvider = ({ children }) => {
         ballStates,
         nineIsPotted,
         BallImages,
+        editBalls,
+        setEditBalls,
         updateBallState,
         getOverlayImage,
         turnOver,

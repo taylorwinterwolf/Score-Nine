@@ -113,7 +113,7 @@ export default function ScoreNine() {
         })}
       </div>
 
-      {/*<EditRack />*/}
+      <EditRack />
 
       {/*BUTTONS*/}
       <div className="row mb-5">
