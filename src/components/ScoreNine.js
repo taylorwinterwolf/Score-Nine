@@ -104,12 +104,14 @@ export default function ScoreNine() {
                   src={BallImages[ballState.id].img}
                   alt=""
                 />
-                <img
-                  key={"icon-" + ballState.id}
-                  className="overlayImage"
-                  src={getOverlayImage(ballState)}
-                  alt=""
-                />
+                {ballState.currentState !== 'default' &&
+                  <img
+                    key={"icon-" + ballState.id}
+                    className="overlayImage"
+                    src={getOverlayImage(ballState)}
+                    alt=""
+                  />
+                }
               </div>
             );
           }

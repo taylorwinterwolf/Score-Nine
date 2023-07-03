@@ -255,7 +255,7 @@ export const ScoreNineProvider = ({ children }) => {
       case "dead":
         return require("../assets/deadball.png");
       default:
-        return ballState.image;
+        return
     }
   };
 
