@@ -1,6 +1,7 @@
 import { useScoreNine } from "../contexts/ScoreNineContext";
 import PlayerCard from "./PlayerCard";
 import EditRack from "./EditRack";
+import EditPlayers from "./EditPlayers";
 import logo from "../assets/logo.png";
 
 export default function ScoreNine() {
@@ -48,6 +49,7 @@ export default function ScoreNine() {
         skillLevel={players[0].skillLevel !== null ? players[0].skillLevel : 0}
         pointsNeeded={players[0].pointsNeeded}
         totalPoints={players[0].totalPoints}
+        rackPoints={players[0].rackPoints}
         skillPoints={players[0].skillPoints}
       />
 
@@ -59,6 +61,7 @@ export default function ScoreNine() {
         skillLevel={players[1].skillLevel !== null ? players[1].skillLevel : 0}
         pointsNeeded={players[1].pointsNeeded}
         totalPoints={players[1].totalPoints}
+        rackPoints={players[1].rackPoints}
         skillPoints={players[1].skillPoints}
       />
 
@@ -116,31 +119,20 @@ export default function ScoreNine() {
       <EditRack />
 
       {/*BUTTONS*/}
-      <div className="row mb-5">
+      {nineIsPotted &&
+          <div className="row">
+            <div className="col d-flex">
+              <button type="button" className="flex-fill btn btn-secondary" onClick={newRack}>
+                Start New Rack
+              </button>
+            </div>
+          </div>
+        }
+      <div className="row">
         <div className="col d-flex">
-          <button
-            type="button"
-            className={
-              "flex-fill btn " +
-              (!nineIsPotted ? "btn-secondary" : "btn-outline-secondary")
-            }
-            onClick={nineIsPotted ? undefined : turnOver}
-          >
+          <button type="button" className={ "flex-fill btn " + (!nineIsPotted ? "btn-secondary" : "btn-outline-secondary")} onClick={nineIsPotted ? undefined : turnOver}>
             Turn Over
           </button>
-
-          <button
-            type="button"
-            className={
-              "flex-fill btn " +
-              (nineIsPotted ? "btn-secondary" : "btn-outline-secondary")
-            }
-            disabled={!nineIsPotted}
-            onClick={newRack}
-          >
-            Start New Rack
-          </button>
-
           <button
             type="button"
             className="flex-fill btn btn-outline-secondary"
@@ -148,29 +140,30 @@ export default function ScoreNine() {
             data-bs-target="#editRackCollapse"
             aria-expanded="false"
             aria-controls="editRackCollapse"
+            disabled={players[0].rackBallsPotted.length === 0 && players[1].rackBallsPotted.length === 0 && deadBalls.length === 0}
           >
             Edit Rack
           </button>
         </div>
       </div>
-
       <div className="row">
         <div className="col d-flex">
           <button
             type="button"
-            className="flex-fill btn btn-outline-primary"
+            className="flex-fill btn btn-outline-secondary"
             onClick={clearAll}
           >
             Clear Everything
           </button>
           <button
             type="button"
-            className="flex-fill btn btn-outline-primary"
+            className="flex-fill btn btn-outline-secondary"
             data-bs-toggle="modal"
             data-bs-target="#editPlayersModal"
           >
             Edit Players
           </button>
+          <EditPlayers/>
         </div>
       </div>
     </div>

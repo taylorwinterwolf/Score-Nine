@@ -1,10 +1,10 @@
 import { ballIcons } from "./BallIcons"
 
-export default function PlayerCard({ playerActive, playerName, rackBallsPotted, skillLevel, pointsNeeded, totalPoints, skillPoints }){
+export default function PlayerCard({ playerActive, playerName, rackBallsPotted, skillLevel, pointsNeeded, totalPoints, rackPoints, skillPoints }){
     
     const inlineStyles = {
         activePlayer: {
-            backgroundColor: '#729142',
+            backgroundColor: 'rgb(177 128 54)',
             borderRadius: '10px 0px 0px 10px',
             color:'gold'
         },
@@ -39,13 +39,13 @@ export default function PlayerCard({ playerActive, playerName, rackBallsPotted, 
                             SL {skillLevel !== null ? skillLevel : 0}
                         </div>
                         <div className="col toWin d-flex justify-content-center align-items-center">
-                            <div className="col">{pointsNeeded} TO WIN</div>
+                            <div className="col">{pointsNeeded - rackPoints} TO WIN</div>
                         </div>
                     </div>
                 </div>
                 <div className="col-2 scoreBoard d-flex flex-column">
                     <div className="row flex-grow-1" style={{ backgroundColor: '#838370' }}>
-                            <h1>{totalPoints}</h1>
+                            <h1>{totalPoints + rackPoints}</h1>
                     </div>
                     <div className="row flex-grow-1" style={{ backgroundColor: '#6d828f' }}>
                         <h1>{skillPoints}</h1>

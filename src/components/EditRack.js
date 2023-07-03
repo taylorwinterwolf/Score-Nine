@@ -2,8 +2,7 @@ import { useScoreNine } from "../contexts/ScoreNineContext"
 
 
 export default function EditRack() {
-  const { players, BallImages, deadBalls, ballsToUpdate, setBallsToUpdate, editRack } = useScoreNine();
-  
+  const { players, BallImages, deadBalls, ballsToUpdate, setBallsToUpdate, editRack } = useScoreNine()
   
   function switchBallOptions(ballID, currentState, currentOwner) {
     console.log("Ball ID: ", ballID, "Current Owner: ", currentOwner, "Current State: ", currentState)
