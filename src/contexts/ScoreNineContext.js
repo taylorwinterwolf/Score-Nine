@@ -213,18 +213,18 @@ export const ScoreNineProvider = ({ children }) => {
 
   function calculateTotals() {
     const playersPotted = [players[0].rackBallsPotted, players[1].rackBallsPotted]
-    console.log("Balls Potted: ", playersPotted)
+    //console.log("Balls Potted: ", playersPotted)
     let playersPoints = [0,0]
     playersPotted.forEach((balls, index) => {
       balls.forEach(ball => {
         const ballValue = getBallValue(ball)
-        console.log("Add ball value: ", ballValue, " to player at index: ", index)
+        //console.log("Add ball value: ", ballValue, " to player at index: ", index)
         playersPoints[index] += ballValue 
       })
     })
-    console.log("Players Total Points: ", playersPoints)
+    //console.log("Players Total Points: ", playersPoints)
     playersPoints.forEach((points, index) => {
-      console.log("In playersPoints loop at index: ", index, " total points: ",points)
+      //console.log("In playersPoints loop at index: ", index, " total points: ",points)
       setPlayers((prevPlayers) => {
         const updatedPlayers = [...prevPlayers];
         updatedPlayers[index] = {
@@ -234,6 +234,10 @@ export const ScoreNineProvider = ({ children }) => {
         return updatedPlayers
       })
     })
+  }
+
+  function checkForWinner(){
+
   }
 
   function editRack() {
