@@ -1,43 +1,19 @@
-import { useScoreNine } from "../contexts/ScoreNineContext";
-import PlayerCard from "./PlayerCard";
-import EditRack from "./EditRack";
-import EditPlayers from "./EditPlayers";
-import logo from "../assets/logo.png";
+import { useScoreNine } from "../contexts/ScoreNineContext"
+import PlayerCard from "./PlayerCard"
+import EditRack from "./EditRack"
+import EditPlayers from "./EditPlayers"
+import logo from "../assets/logo.png"
 
 export default function ScoreNine() {
-  const {
-    players,
-    playerOneActive,
-    deadBalls,
-    ballIcons,
-    rackNumber,
-    ballStates,
-    nineIsPotted,
-    BallImages,
-    updateBallState,
-    getOverlayImage,
-    turnOver,
-    newRack,
-    clearAll,
+  const { players, playerOneActive, deadBalls, ballIcons, rackNumber, ballStates, nineIsPotted, BallImages,
+    updateBallState, getOverlayImage, turnOver, newRack, customPlayers, clearAll
   } = useScoreNine();
-
-  const inlineStyles = {
-    activePlayer: {
-      backgroundColor: "#729142",
-      borderRadius: "10px 0px 0px 10px",
-      color: "gold",
-    },
-    inActivePlayer: {
-      backgroundColor: "#839099",
-      borderRadius: "10px 0px 0px 10px",
-    },
-  };
 
   return (
     <div className="centerTxt">
       <div className="row mb-2 mt-2 d-flex justify-content-center">
         <div className="col-7" id="logoWrap">
-          <img src={logo} alt="" />
+          <img src={logo} alt="Score Nine" />
         </div>
       </div>
 
@@ -129,7 +105,8 @@ export default function ScoreNine() {
               </button>
             </div>
           </div>
-        }
+      }
+      
       <div className="row">
         <div className="col d-flex">
           <button type="button" className={ "flex-fill btn " + (!nineIsPotted ? "btn-secondary" : "btn-outline-secondary")} onClick={nineIsPotted ? undefined : turnOver}>
@@ -150,22 +127,21 @@ export default function ScoreNine() {
       </div>
       <div className="row">
         <div className="col d-flex">
+          <button type="button" className={"flex-fill btn " + (customPlayers ? "btn-outline-success" : "btn-success")} data-bs-toggle="modal" data-bs-target="#editPlayersModal">
+            Edit Players
+          </button>
+        </div>
+      </div>
+      <div className="row">
+        <div className="col d-flex">
           <button
             type="button"
             className="flex-fill btn btn-outline-secondary"
             onClick={clearAll}
           >
-            Clear Everything
+            Reset Default
           </button>
-          <button
-            type="button"
-            className="flex-fill btn btn-outline-secondary"
-            data-bs-toggle="modal"
-            data-bs-target="#editPlayersModal"
-          >
-            Edit Players
-          </button>
-          <EditPlayers/>
+          <EditPlayers />
         </div>
       </div>
     </div>

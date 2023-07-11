@@ -1,10 +1,11 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useRef } from "react";
 import UseLocalStorage from "../hooks/UseLocalStorage";
 import { InitialBallStates } from "../components/InitialBallStates";
 import { ballIcons } from "../components/BallIcons";
 import { BallImages } from "../components/BallImages";
 import { defaultPlayers } from "../components/DefaultPlayers"
 import { defaultBallsToUpdate } from "../components/DefaultBallsToUpdate"
+import starsImg from "../assets/3stars.png"
 
 const ScoreNineContext = createContext();
 
@@ -13,7 +14,8 @@ export function useScoreNine() {
 }
 
 export const ScoreNineProvider = ({ children }) => {
-  const [playerOneActive, setPlayerOneActive] = useState(true);
+  const [playerOneActive, setPlayerOneActive] = useState(true)
+  const [customPlayers, setCustomPlayers] = useState(false)
   const [ballStates, setBallStates] = UseLocalStorage("ballStates", InitialBallStates)
   const [nineIsPotted, setNineIsPotted] = useState(false);
   const [rackNumber, setRackNumber] = useState(1);
@@ -21,13 +23,25 @@ export const ScoreNineProvider = ({ children }) => {
   const [players, setPlayers] = UseLocalStorage("players", defaultPlayers)
   const [ballsToUpdate, setBallsToUpdate] = UseLocalStorage("ballsToUpdate", defaultBallsToUpdate)
   const [calculateTotalsFlag, setCalculateTotalsFlag] = useState(false)
+  const [checkWinnerFlag, setCheckWinnerFlag] = useState(false)
+  const [winner, setWinner] = useState()
+  const winnerModalRef = useRef()
 
   useEffect(() => {
     if (calculateTotalsFlag === true) {
-      calculateTotals();
+      calculateTotals()
       setCalculateTotalsFlag(false)
+      setCheckWinnerFlag(true)
     }
   }, [calculateTotalsFlag])
+
+  useEffect(() => {
+    console.log("Inside Use Effect, Winner Flag has been set")
+    if (checkWinnerFlag === true) {
+      checkForWinner()
+      setCheckWinnerFlag(false)
+    }
+  }, [checkWinnerFlag])
 
   const updateBallState = (ballNum, editRack=false, updateOwner) => {
     //KEY: player1 = 0, player2 = 1, deadBall = 3, reset = 4
@@ -118,7 +132,7 @@ export const ScoreNineProvider = ({ children }) => {
   }
 
   function updatePlayers(ballNum, previousOwner, currentOwner) {
-    console.log("In updatePlayers, Ball Number is:", ballNum, "Previous Owner: ", previousOwner, "Current Owner is: ", currentOwner)
+    //console.log("In updatePlayers, Ball Number is:", ballNum, "Previous Owner: ", previousOwner, "Current Owner is: ", currentOwner)
     const ballIndex = ballNum - 1
 
     if (currentOwner === 3) {
@@ -236,8 +250,22 @@ export const ScoreNineProvider = ({ children }) => {
     })
   }
 
-  function checkForWinner(){
-
+  function checkForWinner() {
+    console.log("Inside check for winner")
+    console.log("Player One's Total Points: ", players[0].totalPoints + players[0].rackPoints, " and Skill Points: ", players[0].skillPoints)
+    const winnerModal = winnerModalRef.current
+    
+    players.forEach((player, index) => {
+      if ((player.totalPoints + player.rackPoints) >= player.skillPoints) {
+        setWinner(player.name)
+        console.log("Player ", index, " Is a Winner")
+        const bsModal = new window.bootstrap.Modal(winnerModal, {
+            backdrop: 'static',
+            keyboard: false
+        })
+        bsModal.show()
+      }
+    })
   }
 
   function editRack() {
@@ -292,9 +320,9 @@ export const ScoreNineProvider = ({ children }) => {
         pointsNeeded: skillPointsKey[skillIndex],
       };
       return updatedPlayers;
+      })
     })
-  })
-
+    setCustomPlayers(true)
   }
 
   const turnOver = () => {
@@ -302,6 +330,25 @@ export const ScoreNineProvider = ({ children }) => {
     setPlayerOneActive((prevValue) => !prevValue)
     archiveBalls()
   };
+
+  const resetMatch = () => {
+    setBallStates(InitialBallStates);
+    setPlayerOneActive(true);
+    setNineIsPotted(false);
+    setRackNumber(1);
+    setDeadBalls([]);
+    setBallsToUpdate(defaultBallsToUpdate)
+    players.forEach((player, index) => {
+      setPlayers((prevPlayers) => {
+        const updatedPlayers = [...prevPlayers]
+        updatedPlayers[index].totalPoints = 0
+        updatedPlayers[index].pointsNeeded = prevPlayers[index].skillPoints
+        updatedPlayers[index].rackBallsPotted = []
+        updatedPlayers[index].rackPoints = 0
+        return updatedPlayers;
+      })
+    })
+  }
 
   const clearAll = () => {
     setBallStates(InitialBallStates);
@@ -311,6 +358,7 @@ export const ScoreNineProvider = ({ children }) => {
     setDeadBalls([]);
     setPlayers(defaultPlayers)
     setBallsToUpdate(defaultBallsToUpdate)
+    setCustomPlayers(false)
   };
 
   const newRack = () => {
@@ -332,6 +380,7 @@ export const ScoreNineProvider = ({ children }) => {
   }
 
   return (
+    <>
     <ScoreNineContext.Provider
       value={{
         players,
@@ -344,6 +393,8 @@ export const ScoreNineProvider = ({ children }) => {
         BallImages,
         ballsToUpdate,
         setBallsToUpdate,
+        customPlayers,
+        setCustomPlayers,
         addPlayers,
         editRack,
         updateBallState,
@@ -351,9 +402,32 @@ export const ScoreNineProvider = ({ children }) => {
         turnOver,
         newRack,
         clearAll,
+        checkForWinner
       }}
     >
       {children}
-    </ScoreNineContext.Provider>
+      </ScoreNineContext.Provider>
+      {/*WINNERS MODAL*/ }
+      <div className="modal fade centerTxt" id="WinnersModal" ref={winnerModalRef}>
+        <div className="modal-dialog">
+          <div className="modal-content">
+              <div className="modal-body">
+                <div className="row justify-content-center"><div className="col-lg-6"><img src={starsImg} alt="Three Stars"/></div></div>
+                <div className="row"><div className="col"><h2 className="bold">Congratulations {winner}!</h2> <br /><h4>You're the best player that ever lived!</h4></div>
+              </div>        
+          </div>
+          <div className="modal-footer">
+            <div className="row">
+              <div className="col d-flex">
+                  <button type="button" className="flex-fill btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <button type="button" className="flex-fill btn btn-primary" data-bs-dismiss="modal" onClick={resetMatch}>Replay Match</button>
+                  <button type="button" className="flex-fill btn btn-warning" data-bs-dismiss="modal" onClick={clearAll}>Reset Default</button>
+              </div>
+            </div>
+          </div>    
+          </div>
+        </div>
+      </div>
+    </>
   );
 };

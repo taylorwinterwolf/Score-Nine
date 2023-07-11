@@ -39,13 +39,13 @@ export default function PlayerCard({ playerActive, playerName, rackBallsPotted, 
                             SL {skillLevel !== null ? skillLevel : 0}
                         </div>
                         <div className="col toWin d-flex justify-content-center align-items-center">
-                            <div className="col">{pointsNeeded - rackPoints} TO WIN</div>
+                            <div className="col">{pointsNeeded - rackPoints > 0 ? pointsNeeded - rackPoints : 0} TO WIN</div>
                         </div>
                     </div>
                 </div>
                 <div className="col-2 scoreBoard d-flex flex-column">
                     <div className="row flex-grow-1" style={{ backgroundColor: '#838370' }}>
-                            <h1>{totalPoints + rackPoints}</h1>
+                            <h1>{totalPoints + rackPoints <= skillPoints ? totalPoints + rackPoints : skillPoints}</h1>
                     </div>
                     <div className="row flex-grow-1" style={{ backgroundColor: '#6d828f' }}>
                         <h1>{skillPoints}</h1>
