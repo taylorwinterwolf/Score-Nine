@@ -3,7 +3,6 @@
 This site was built using React JS and is hosted with Firebase Cloud Hosting [View Site](https://taylortay.com/scorenine/) 
 
 Score Nine pool scorekeeping web application, built with React JS, utilizes various features such as context, useState, and useEffect. It tracks the scores and points needed for two players, while managing the state of nine balls with three options (potted, dead, or still on the table) and accounting for special conditions of the nine ball. Users can easily input scores, view standings, and receive visual feedback on the current player's turn and exceptional events. This user-friendly app effectively handles the game state, ensuring an efficient and enjoyable Nine Ball pool experience. Click around, take it for a spin and have fun!
----
 
 ## App features and usage
 
@@ -46,7 +45,7 @@ Score Nine pool scorekeeping web application, built with React JS, utilizes vari
 
 ### Edit Rack
 
-![Image](https://taylortay.com/scorenine/screengrabs/editrack)
+![Image](https://taylortay.com/scorenine/screengrabs/editrack.png)
 
 ### Winner Modal
 
