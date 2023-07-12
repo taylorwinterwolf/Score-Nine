@@ -1,70 +1,54 @@
-# Getting Started with Create React App
+# Score Nine
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This site was built using React JS and is hosted with Firebase Cloud Hosting [View Site](https://taylortay.com/scorenine/) 
 
-## Available Scripts
+Score Nine pool scorekeeping web application, built with React JS, utilizes various features such as context, useState, and useEffect. It tracks the scores and points needed for two players, while managing the state of nine balls with three options (potted, dead, or still on the table) and accounting for special conditions of the nine ball. Users can easily input scores, view standings, and receive visual feedback on the current player's turn and exceptional events. This user-friendly app effectively handles the game state, ensuring an efficient and enjoyable Nine Ball pool experience. Click around, take it for a spin and have fun!
+---
 
-In the project directory, you can run:
+## App features and usage
 
-### `npm start`
+- **Changing Ball State**
+  - Click on any ball to change it's state from on the table to potted. Click the ball again and it's state changes to dead. Click the ball a third time and it gets reset.
+- **Visual Representation of Ball State**
+  - When balls are click in repetition they visually change to represent their current state. Ball icons also get placed in the active players section or in the Dead Balls section.
+- **Score Updates**
+  - The score updates every time a ball is clicked to accurately represent the score
+- **Turnovers**
+  - Seamlessly switch the active player
+- **Rack State**
+  - Every time there is a turn over, any downed balls are removed from the available balls. When the nine is potted and start new rack is selected, all current scores and stats remain while the rack resets for the next rack. The current rack number is counted and displayed
+- **Edit Players**
+  - This displays a modal that allows the user to add two custom players with custom skill levels. The points needed are dynamically generated depending on skill level selected
+- **Edit Rack**
+  - The most robust feature of this app, Edit Rack gives you the ability to relocate any potted ball to any potential location all in one button push after desired options are selected. 
+- **Replay Match**
+  - Do you want a rematch! Just select Replay Match after a winner is determined and bring your A game to prove your worth   
+- **Data Persistence**
+  - All data is stored in local storage for each user. The data will persist upon page refresh or close.
+- **Responsive Design**
+  - This app works seamlessly across different devices for an optimal user experience
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Interface Images
 
-### `npm test`
+### Landing Page
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+![Image](https://taylortay.com/scorenine/screengrabs/landingpage.png)
 
-### `npm run build`
+### App In Action
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+![Image](https://taylortay.com/scorenine/screengrabs/activepage.png)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Add Custom Players Modal
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+![Image](https://taylortay.com/scorenine/screengrabs/addcustomplayers.png)
 
-### `npm run eject`
+### Edit Rack
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+![Image](https://taylortay.com/scorenine/screengrabs/editrack)
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Winner Modal
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+![Image](https://taylortay.com/scorenine/screengrabs/winnermodal.png)
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
