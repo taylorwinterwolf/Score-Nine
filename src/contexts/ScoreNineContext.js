@@ -15,7 +15,7 @@ export function useScoreNine() {
 
 export const ScoreNineProvider = ({ children }) => {
   const [playerOneActive, setPlayerOneActive] = useState(true)
-  const [customPlayers, setCustomPlayers] = useState(false)
+  const [customPlayers, setCustomPlayers] = UseLocalStorage("customPlayerFlag", false)
   const [ballStates, setBallStates] = UseLocalStorage("ballStates", InitialBallStates)
   const [nineIsPotted, setNineIsPotted] = useState(false);
   const [rackNumber, setRackNumber] = useState(1);

@@ -98,23 +98,35 @@ export default function ScoreNine() {
 
       {/*BUTTONS*/}
       {nineIsPotted &&
-          <div className="row">
+          <div className="row mb-2">
             <div className="col d-flex">
-              <button type="button" className="flex-fill btn btn-secondary" onClick={newRack}>
+              <button type="button" className="flex-fill btn btn-lg btn-secondary p-3" onClick={newRack}>
                 Start New Rack
               </button>
             </div>
           </div>
       }
-      
-      <div className="row">
+      {!customPlayers &&
+        <div className="row mb-2">
+          <div className="col d-flex">
+            <button type="button" className="flex-fill btn btn-lg btn-success" data-bs-toggle="modal" data-bs-target="#editPlayersModal">
+              Add Match Up
+            </button>
+          </div>
+        </div>
+      }
+      <div className="row mb-2">
         <div className="col d-flex">
-          <button type="button" className={ "flex-fill btn " + (!nineIsPotted ? "btn-secondary" : "btn-outline-secondary")} onClick={nineIsPotted ? undefined : turnOver}>
+          <button type="button" className={ "flex-fill btn btn-lg p-3 " + (!nineIsPotted ? "btn-secondary" : "btn-outline-secondary")} onClick={nineIsPotted ? undefined : turnOver}>
             Turn Over
           </button>
+        </div>
+      </div>
+      <div className="row mb-2">
+        <div className="col d-flex">
           <button
             type="button"
-            className="flex-fill btn btn-outline-secondary"
+            className="flex-fill btn btn-lg btn-secondary"
             data-bs-toggle="collapse"
             data-bs-target="#editRackCollapse"
             aria-expanded="false"
@@ -125,18 +137,20 @@ export default function ScoreNine() {
           </button>
         </div>
       </div>
-      <div className="row">
-        <div className="col d-flex">
-          <button type="button" className={"flex-fill btn " + (customPlayers ? "btn-outline-success" : "btn-success")} data-bs-toggle="modal" data-bs-target="#editPlayersModal">
-            Edit Players
-          </button>
+      {customPlayers &&
+        <div className="row mb-2">
+          <div className="col d-flex">
+            <button type="button" className="flex-fill btn btn-lg btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editPlayersModal">
+              Edit Match Up
+            </button>
+          </div>
         </div>
-      </div>
+      }
       <div className="row">
         <div className="col d-flex">
           <button
             type="button"
-            className="flex-fill btn btn-outline-secondary"
+            className="flex-fill btn btn-sm btn-outline-secondary"
             onClick={clearAll}
           >
             Reset Default
