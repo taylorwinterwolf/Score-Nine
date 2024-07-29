@@ -36,7 +36,7 @@ export const ScoreNineProvider = ({ children }) => {
   }, [calculateTotalsFlag])
 
   useEffect(() => {
-    console.log("Inside Use Effect, Winner Flag has been set")
+    //console.log("Inside Use Effect, Winner Flag has been set")
     if (checkWinnerFlag === true) {
       checkForWinner()
       setCheckWinnerFlag(false)
